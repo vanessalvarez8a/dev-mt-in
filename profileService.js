@@ -1,6 +1,6 @@
 angular.module('devMtIn')
 .service('profileService', function( $http ) {
-	var baseUrl = 'http://localhost:8081'
+	var baseUrl = 'http://localhost:8081';
 
 	this.saveProfile = function( profile ) {
 		$http({
