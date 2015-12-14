@@ -324,5 +324,87 @@ Now attach this function to a view via an `ng-click` on the span element with a 
 ###Step Three: Injecting `$q` and creating our own promises.
 Our next step is going to be finding second level connections. To do this we will need to use `$q`. Yesterday we became accustomed to using the `.then` method on our HTTP requests. What `.then` is doing is handling the promise returned from the HTTP request. Because these requests are asynchronous `.then` is called when the promise is resolved, letting the rest of our code continue running. `$q` exists to create our own promises when necessary.
 
-We'll start by injecting `$q` into our `friendService`. We're going to be using it to search for second level friends. To do this we'll need a new function: `findFriendsFriends`.
+We'll start by injecting `$q` into our `friendService`. We're going to be using it to search for second level friends. To do this we'll need a new function: `findFriendsFriends`. This function will take in a single `profile` argument.
 
+Inside this function we need to declare an `index` variable and set it equal to 0. We will also create our first promise with `$q`. To do this we create a new variable named `deferred` and set it equal to `$q.defer()`.
+
+We will be making use of a closure to process our friends list, so we are going to declare a new function inside of the `findFriendsFriends` named `getNextFriend`. In this `getNextFriend` function we first need to check whether or not our profile has a friend at the current index. So far our function should look something like this:
+```javascript
+this.findFriendsFriends = function( profile ) {
+	var index = 0; // Create an index that we will use to track friends.
+	var deferred = $q.defer(); // Create a promise and assign it to the variable deferred
+
+	function getNextFriend() { // Declare a closure function.
+		if (profile.friends[index]) { // Check to see if there are friends remaining in the array
+			//...
+		}
+```
+Inside of this `if` statement we need to make an HTTP request with a method of 'GET', and a url of `baseUrl + '/api/friends-friends/' + profile.friends[index]._id`.
+
+Our `.then` method on this request will take in a `friends` parameter and assign it to `profile.friends[index].friends = friends.data;`, then increment index, and finally call `getNextFriend`. Don't forget to add an error handler after `.then`! Here's what we have so far:
+```javascript
+this.findFriendsFriends = function( profile ) {
+	var index = 0;
+	var deferred = $q.defer();
+
+	function getNextFriend() {
+		if (profile.friends[index]) {
+			$http({ //Our API request
+				  method: 'GET'
+				, url: baseUrl + '/api/friends-friends/' + profile.friends[index]._id
+			})
+			.then(function( friends ) { //Taking in an array of friends returned from the server.
+				profile.friends[index].friends = friends.data; // Update our friend with the recieved data.
+				index++; // Increment our counter.
+				getNextFriend(); // Recall the function to handle the next friend.
+			})
+			.catch(function( err ) { // Error Catching
+				return console.error(err);
+			});
+```
+To finish this function we need to add an `else` that will run `deferred.resolve(profile)` and then `return deferred.promise`. The last step is adding a function call to the end of our outer function. Here is the final version. Try to read through it several times to ensure you understand everything that is going on.
+```javascript
+this.findFriendsFriends = function( profile ) {
+	var index = 0;
+	var deferred = $q.defer();
+
+	function getNextFriend() {
+		if (profile.friends[index]) {
+			$http({
+				  method: 'GET'
+				, url: baseUrl + '/api/friends-friends/' + profile.friends[index]._id
+			})
+			.then(function( friends ) {
+				profile.friends[index].friends = friends.data;
+				index++;
+				getNextFriend();
+			})
+			.catch(function( err ) {
+				return console.error(err);
+			});
+		} else { // Once we have finished running through our friends array
+			deferred.resolve(profile); // Resolve our promise with our updated profile
+			return deferred.promise; // Return the promise
+		}
+	}
+	getNextFriend(); // Invoke the inner function for the first time
+}
+```
+All that is left is to call our new function. I will be adding the function call inside of `homeCtrl`'s `$scope.checkForProfile` function, inside of the `.then`.
+```javascript
+$scope.checkForProfile = function() {
+	var profileId = JSON.parse(localStorage.getItem('profileId'));
+
+	if (profileId) {
+		profileService.checkForProfile(profileId.profileId)
+			.then(function( profile ) {
+				$scope.myProfile = profile.data;
+				friendService.findFriendsFriends(profile.data); // Finding second level friends.
+			})
+			.catch(function( err ) {
+				console.error(err);
+			});
+	}
+}
+```
+Now whenever your code checks for your profile it will also update second level friends.

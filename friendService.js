@@ -29,18 +29,16 @@ angular.module('devMtIn')
 
 	this.findFriendsFriends = function( profile ) {
 		var index = 0;
-		// var friends = profile.friends;
 		var deferred = $q.defer();
 
 		function getNextFriend() {
 			if (profile.friends[index]) {
 				$http({
 					  method: 'GET'
-					, url: baseUrl + '/api/friends-friends/' + profile._id + '/' + profile.friends[index]._id
+					, url: baseUrl + '/api/friends-friends/' + profile.friends[index]._id
 				})
 				.then(function( friends ) {
 					profile.friends[index].friends = friends.data;
-					console.log(profile.friends[index]);
 					index++;
 					getNextFriend();
 				})
@@ -51,7 +49,7 @@ angular.module('devMtIn')
 				return deferred.resolve(profile);
 			}
 		}
-		return getNextFriend();
+		getNextFriend();
 	}
 
 });

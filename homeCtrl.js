@@ -25,6 +25,7 @@ angular.module('devMtIn')
 			profileService.checkForProfile(profileId.profileId)
 				.then(function( profile ) {
 					$scope.myProfile = profile.data;
+					friendService.findFriendsFriends(profile.data);
 				})
 				.catch(function( err ) {
 					console.error(err);
@@ -61,10 +62,6 @@ angular.module('devMtIn')
 			.catch(function( err ) {
 				console.error(err);
 			});
-	}
-
-	$scope.findFriendsFriends = function() {
-		friendService.findFriendsFriends($scope.myProfile)
 	}
 
 	$scope.sortOptions = [{
