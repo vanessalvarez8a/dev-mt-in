@@ -408,3 +408,5 @@ $scope.checkForProfile = function() {
 }
 ```
 Now whenever your code checks for your profile it will also update second level friends.
+
+You've completed your first week of Angular! Congratulations! Just today you created your own promise and implemented a recursive, closure scoped function!
