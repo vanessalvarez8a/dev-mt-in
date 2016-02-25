@@ -17,21 +17,21 @@
   <div class="wrapper">  
     <div>
       <h2>Profile</h2>
-      <button class="l-btn l-btn-main">Editing :</button>
+      <button ng-click="editing=!editing" class="l-btn l-btn-main">Editing:</button>
     </div>
 
     <div>      
 
-      <input ng-model="myProfile.name" id="name" type="text" placeholder="Your Name">
+      <input ng-model="myProfile.name" ng-disabled="!editing" id="name" type="text" placeholder="Your Name">
       <br />
 
-      <input id="likes" type="text" placeholder="Likes">
+      <input ng-model="myProfile.likes" id="likes" ng-disabled="!editing" type="text" placeholder="Likes">
       <br />
 
-      <input id="favColor" type="text" placeholder="Favorite Color">
+      <input ng-model="myProfile.favColor" id="favColor" ng-disabled="!editing" type="text" placeholder="Favorite Color">
       <br />
-      <button class="l-btn l-btn-success">Save</button>
-      <button class="l-btn l-btn-danger">Delete</button>
+      <button ng-click="saveProfile(myProfile)" class="l-btn l-btn-success">Save</button>
+      <button ng-click="deleteProfile()" class="l-btn l-btn-danger">Delete</button>
     </div>
   </div>
 
@@ -39,7 +39,7 @@
     <h2>Friends</h2>
 
     <button class="l-btn l-btn-main">Go</button>
-    <input ng-model="findFriend.name" type="text" placeholder="Find Friends">
+    <input ng-model="findFriend.name" ng-disabled="!editing" type="text" placeholder="Find Friends">
     <select ng-model="sortReverse" ng-options="option.value as option.display for option in sortOptions"></select>    
     <div class="friendList" ng-repeat="friend in myProfile.friends | filter : findFriend.name | orderBy : 'name' : sortReverse">
       <span class="closeBtn"></span>
@@ -67,6 +67,7 @@
 	</div>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.0/angular.js"type="text/javascript"></script> 
  <script src="./app.js" type="text/javascript"></script>
+ <script src="./profileService.js" type="text/javascript"></script>
  <script src="./homeCtrl.js" type="text/javascript"></script>
 </body>
 
